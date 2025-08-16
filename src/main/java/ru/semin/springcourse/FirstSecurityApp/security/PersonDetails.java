@@ -1,10 +1,12 @@
 package ru.semin.springcourse.FirstSecurityApp.security;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.semin.springcourse.FirstSecurityApp.models.Person;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class PersonDetails implements UserDetails {
@@ -20,7 +22,7 @@ private final Person person;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();//потом будут роли будет возвращать коллекцию прав
+        return Collections.singletonList(new SimpleGrantedAuthority(person.getRole()));//потом будут роли будет возвращать коллекцию прав
     }
 
     @Override

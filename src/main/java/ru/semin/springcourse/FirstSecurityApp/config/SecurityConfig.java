@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -40,8 +41,8 @@ public class SecurityConfig  {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+    public PasswordEncoder getPasswordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
  @Bean
@@ -56,10 +57,11 @@ public class SecurityConfig  {
 //        }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .authorizeHttpRequests(auth -> auth
+        http.authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/admin").hasRole("ADMIN")
                         .requestMatchers("/auth/login","/auth/registration","error").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().hasAnyRole("USER","ADMIN")
+
                 )
                 .formLogin(login -> login
                         .loginPage("/auth/login")
@@ -72,6 +74,15 @@ public class SecurityConfig  {
 
         return http.build();
     }
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(personDetailsService);
+        provider.setPasswordEncoder(getPasswordEncoder());
+        return provider;
+    }
+
+
 
 }
 
